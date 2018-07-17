@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import Cards from './Components/Card';
-// import { body, row } from './styles';
 
 const MoltinGateway = require('@moltin/sdk').gateway;
 
@@ -10,8 +9,6 @@ const Moltin = MoltinGateway({
   client_secret: 'D1wmsAtww4Cx9Zr6R3P1gHflBTHRR4CT1VLIW9A3rf'
 })
 
-const cart = Moltin.Cart().Items().then((item)=>console.log('this is cart.......', item));
-
 class App extends Component {
 
   constructor(props) {
@@ -19,15 +16,31 @@ class App extends Component {
     this.state = {
       loaded: false,
       products: [],
-      cart: []
+      cart: [],
+      items: 0
     };
   }
+  cart = Moltin.Cart().Items().then(
+    (item)=> {
+      console.log('this is cart.......', item)
+      this.setState({
+        items: item.data.length
+      })
+    }
+  );
   fetchcart = () => {
-    Moltin.Cart().Items().then((items)=>(this.setState({cart: items})));
+    Moltin.Cart().Items().then((items)=>(this.setState({
+      cart: items,
+      items: items.data.length
+    },()=>{console.log('loaded......',this.state.items)}
+  )));
   }
   addToCart = (id, quantity) => Moltin.Cart().AddProduct(id, quantity).then((item)=>{
-    alert(`Added ${item.name} to your cart`)
+    alert(`Added ${item} to your cart`);
+    console.log(item);
+    console.log(this.cart);
   });
+  removeFromCart = (id, quantity) => Moltin.Cart().RemoveItem(id, quantity).then(cart => {});
 
   componentDidMount() {
     Moltin.Categories.With('products').All().then(products => {
@@ -37,22 +50,23 @@ class App extends Component {
         response: products,
         count: [0,1,2,3,4,5]
       })
-    }).then(this.fetchCart)
+    }).then(this.cart)
   }
   getImageUrl = (image_id) => {
-    Moltin.Products.With(image_id).All().then(resp=> console.log('image is .............',resp));
+    Moltin.Products.With(image_id).All()
   }
   
   render() {
-    console.log(cart)
     return (
     this.state.loaded ?
       <div className="App">
         <h1> Project E-Commerce </h1>
-        <div className="d-flex flex-column">
+        <div className={`d-flex flex-row ${App}`}>
+        <h1>{this.state.items}</h1>
           {this.state.count.map((index)=>
           <Cards element={this.state.products[index]} image_url={this.getImageUrl(this.state.products[index].relationships.main_image.data.id)} addToCart={this.addToCart}/>
           )}
+          
         </div>
       </div>:
       <div> Loading Please Wait.....</div>
