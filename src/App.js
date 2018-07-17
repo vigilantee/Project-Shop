@@ -22,7 +22,7 @@ class App extends Component {
       items: 0
     };
   }
-  cart = Moltin.Cart().Items().then(
+  cart = Moltin.Cart(reference).Items().then(
     (item)=> {
       console.log('this is cart.......', item)
       this.setState({
