@@ -14,7 +14,7 @@ const Example = (props) => {
             <CardTitle>{props.element.name}</CardTitle>
             <form onsubmit="myFunction()">
             <input type="text" pattern="[0-9]*" onChange={()=>props.updatecount}></input>
-            <Button onClick={()=>props.addToCart(props.element.id, 3)}>Add to Cart</Button>
+            <Button onClick={()=>props.addToCart(props.element.id, 1)}>Add to Cart</Button>
             <Button onClick={()=>props.removeFromCart(props.element.id, 1)}>Remove From Cart</Button>
             </form>
         </CardBody>
