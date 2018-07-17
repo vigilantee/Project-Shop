@@ -9,6 +9,8 @@ const Moltin = MoltinGateway({
   client_secret: 'D1wmsAtww4Cx9Zr6R3P1gHflBTHRR4CT1VLIW9A3rf'
 })
 
+const reference = '15476'
+
 class App extends Component {
 
   constructor(props) {
@@ -28,6 +30,7 @@ class App extends Component {
       })
     }
   );
+
   fetchcart = () => {
     Moltin.Cart().Items().then((items)=>(this.setState({
       cart: items,
@@ -35,12 +38,14 @@ class App extends Component {
     },()=>{console.log('loaded......',this.state.items)}
   )));
   }
+
   addToCart = (id, quantity) => Moltin.Cart().AddProduct(id, quantity).then((item)=>{
-    alert(`Added ${item} to your cart`);
+    alert(`Added item to your cart`);
     console.log(item);
     console.log(this.cart);
-  });
-  removeFromCart = (id, quantity) => Moltin.Cart().RemoveItem(id, quantity).then(cart => {});
+  }).then(this.fetchcart);
+
+  removeFromCart = (id, quantity) => Moltin.Cart(reference).RemoveItem(id, quantity).then(this.fetchcart);
 
   componentDidMount() {
     Moltin.Categories.With('products').All().then(products => {
@@ -62,9 +67,17 @@ class App extends Component {
       <div className="App">
         <h1> Project E-Commerce </h1>
         <div className={`d-flex flex-row ${App}`}>
-        <h1>{this.state.items}</h1>
+          <div style={{height:50,width:50, display:'flex'}}>
+            <img src={require('./Assets/cart.svg')} alt={'loading...'}/>
+            <div className="lblCartCount"><h1>{this.state.items}</h1></div>
+          </div>
           {this.state.count.map((index)=>
-          <Cards element={this.state.products[index]} image_url={this.getImageUrl(this.state.products[index].relationships.main_image.data.id)} addToCart={this.addToCart}/>
+          <Cards
+            element={this.state.products[index]}
+            image_url={this.getImageUrl(this.state.products[index].relationships.main_image.data.id)}
+            addToCart={this.addToCart}
+            removeFromCart={this.removeFromCart}
+          />
           )}
           
         </div>
