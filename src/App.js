@@ -10,6 +10,7 @@ const Moltin = MoltinGateway({
   client_secret: 'D1wmsAtww4Cx9Zr6R3P1gHflBTHRR4CT1VLIW9A3rf'
 })
 
+const cart = Moltin.Cart().Items().then((item)=>console.log('this is cart.......', item));
 
 class App extends Component {
 
@@ -17,33 +18,41 @@ class App extends Component {
     super(props);
     this.state = {
       loaded: false,
-      products: []
+      products: [],
+      cart: []
     };
   }
+  fetchcart = () => {
+    Moltin.Cart().Items().then((items)=>(this.setState({cart: items})));
+  }
+  addToCart = (id, quantity) => Moltin.Cart().AddProduct(id, quantity).then((item)=>{
+    alert(`Added ${item.name} to your cart`)
+  });
 
-  componentWillMount() {
+  componentDidMount() {
     Moltin.Categories.With('products').All().then(products => {
-      console.log(products)
       this.setState({
         loaded: true,
-        products: products.included.products
+        products: products.included.products,
+        response: products,
+        count: [0,1,2,3,4,5]
       })
-    })
-
+    }).then(this.fetchCart)
+  }
+  getImageUrl = (image_id) => {
+    Moltin.Products.With(image_id).All().then(resp=> console.log('image is .............',resp));
   }
   
   render() {
+    console.log(cart)
     return (
     this.state.loaded ?
       <div className="App">
         <h1> Project E-Commerce </h1>
         <div className="d-flex flex-column">
-            <Cards element={this.state.products[0]}/>
-            <Cards element={this.state.products[1]}/>
-            <Cards element={this.state.products[2]}/>
-            <Cards element={this.state.products[3]}/>
-            <Cards element={this.state.products[4]}/>
-            <Cards element={this.state.products[5]}/>
+          {this.state.count.map((index)=>
+          <Cards element={this.state.products[index]} image_url={this.getImageUrl(this.state.products[index].relationships.main_image.data.id)} addToCart={this.addToCart}/>
+          )}
         </div>
       </div>:
       <div> Loading Please Wait.....</div>
